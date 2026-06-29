@@ -28,8 +28,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 90vh;
-      gap: 24px;
+      min-height: 100vh;
+      gap: 20px;
+      padding: 24px;
     }
 
     .pin-title {
@@ -60,35 +61,45 @@
       transition: background 0.1s;
     }
 
-    .-dot.filled {
+    .pin-dot.filled {
       background: #1E8449;
       border-color: #1E8449;
     }
 
-    .-pad {
+    .pin-pad {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(3, 72px);
+      gap: 12px;
       width: 240px;
     }
 
-    .-btn {
-      height: 64px;
-      border-radius: 12px;
+    .pin-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
       border: none;
       background: #1B2631;
       color: #ffffff;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .-btn:active { background: #2C3E50; }
+    .pin-btn:active,
+    .pin-btn:focus { 
+      background: #2C3E50;
+      outline: none;
+    }
 
-    .-btn.del {
-      font-size: 16px;
+    .pin-btn.del {
+      font-size: 18px;
       color: #E74C3C;
     }
 
