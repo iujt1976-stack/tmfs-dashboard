@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Thompson Financial</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* PIN SCREEN */
+    #pin-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 90vh;
+      gap: 24px;
+    }
+
+    .pin-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .pin-subtitle {
+      font-size: 13px;
+      color: #AEB6BF;
+      margin-top: -16px;
+    }
+
+    .pin-display {
+      display: flex;
+      gap: 12px;
+      margin: 8px 0;
+    }
+
+    .pin-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #AEB6BF;
+      background: transparent;
+      transition: background 0.1s;
+    }
+
+    .pin-dot.filled {
+      background: #1E8449;
+      border-color: #1E8449;
+    }
+
+    .pin-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 240px;
+    }
+
+    .pin-btn {
+      height: 64px;
+      border-radius: 12px;
+      border: none;
+      background: #1B2631;
+      color: #ffffff;
+      font-size: 22px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pin-btn:active { background: #2C3E50; }
+
+    .pin-btn.del {
+      font-size: 16px;
+      color: #E74C3C;
+    }
+
+    .pin-err {
+      color: #E74C3C;
+      font-size: 13px;
+      min-height: 18px;
+      text-align: center;
+    }
+
+    /* DASHBOARD SCREEN */
+    #dash-screen { display: none; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .app-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .age-badge {
+      font-size: 11px;
+      color: #AEB6BF;
+      text-align: right;
+    }
+
+    /* SHIELD CARD */
+    .shield-card {
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .shield-safe {
+      background: #0d2b18;
+      border: 2px solid #1E8449;
+    }
+
+    .shield-warn {
+      background: #2b0d0d;
+      border: 2px solid #E74C3C;
+    }
+
+    .shield-label {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .shield-week {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    /* TRULY AVAILABLE */
+    .ta-card {
+      background: #1B2631;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .ta-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #AEB6BF;
+      margin-bottom: 8px;
+    }
+
+    .ta-amount {
+      font-size: 44px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .ta-sub {
+      font-size: 11px;
+      color: #AEB6BF;
+      margin-top: 6px;
+    }
+
+    /* SECTION */
+    .section {
+      background: #1B2631;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #AEB6BF;
+      margin-bottom: 12px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #0d1117;
+    }
+
+    .stat-row:last-child { border-bottom: none; }
+
+    .stat-lbl {
+      font-size: 14px;
+      color: #D0D3D4;
+      flex: 1;
+    }
+
+    .stat-val {
+      font-size: 14px;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .stat-val.amber { color: #F39C12; }
+    .stat-val.red   { color: #E74C3C; }
+    .stat-val.green { color: #1E8449; }
+    .stat-val.white { color: #ffffff; }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0 0;
+      margin-top: 4px;
+      border-top: 1px solid #2C3E50;
+    }
+
+    .total-lbl {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .total-val {
+      font-size: 15px;
+      font-weight: 900;
+      color: #E74C3C;
+    }
+
+    .clear-week {
+      font-size: 13px;
+      color: #1E8449;
+      padding: 8px 0;
+      text-align: center;
+    }
+
+    /* KC BALANCE */
+    .bal-amount {
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffffff;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      flex: 1;
+      height: 48px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-refresh {
+      background: #1E8449;
+      color: #ffffff;
+    }
+
+    .btn-logout {
+      background: #1B2631;
+      color: #AEB6BF;
+      border: 1px solid #2C3E50;
+    }
+
+    /* LOADING */
+    #loading-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 90vh;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #2C3E50;
+      border-top-color: #1E8449;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-msg {
+      color: #AEB6BF;
+      font-size: 14px;
+    }
+
+    /* ERROR */
+    .err-card {
+      background: #2b0d0d;
+      border: 1px solid #E74C3C;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      color: #E74C3C;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    /* PENDING BADGE */
+    .pending-badge {
+      background: #F39C12;
+      color: #0d1117;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* WARTIME BANNER */
+    .wartime-banner {
+      background: #2b1a0d;
+      border: 1px solid #F39C12;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #F39C12;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- PIN SCREEN -->
+  <div id="pin-screen">
+    <div class="pin-title">Thompson Financial</div>
+    <div class="pin-subtitle">Enter your PIN to continue</div>
+    <div class="pin-display">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-err" id="pin-err"></div>
+    <div class="pin-pad">
+      <button class="pin-btn" onclick="pinPress('1')">1</button>
+      <button class="pin-btn" onclick="pinPress('2')">2</button>
+      <button class="pin-btn" onclick="pinPress('3')">3</button>
+      <button class="pin-btn" onclick="pinPress('4')">4</button>
+      <button class="pin-btn" onclick="pinPress('5')">5</button>
+      <button class="pin-btn" onclick="pinPress('6')">6</button>
+      <button class="pin-btn" onclick="pinPress('7')">7</button>
+      <button class="pin-btn" onclick="pinPress('8')">8</button>
+      <button class="pin-btn" onclick="pinPress('9')">9</button>
+      <button class="pin-btn" onclick="pinPress('')" style="opacity:0.2" disabled></button>
+      <button class="pin-btn" onclick="pinPress('0')">0</button>
+      <button class="pin-btn del" onclick="pinDel()">⌫</button>
+    </div>
+  </div>
+
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-msg">Loading your snapshot...</div>
+  </div>
+
+  <!-- DASHBOARD SCREEN -->
+  <div id="dash-screen">
+    <div class="header">
+      <div class="app-title">Thompson Financial</div>
+      <div class="age-badge" id="snap-age"></div>
+    </div>
+
+    <div id="dash-content"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-refresh" onclick="loadDash()">↻ Refresh</button>
+      <button class="btn btn-logout" onclick="logout()">← Exit</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONFIG — replace these before deploying to GitHub Pages
+// ============================================================
+const SHEET_ID  = '1Aejj5C2A3482pGn1phzgbNpnMiQBJDZtb_z2vFFrsLc';
+const API_KEY   = 'AIzaSyDsZo2zsyxdO6-96GB2YIXa2-LQ-Ef0v_k';  // restrict to: iujt1976-stack.github.io/*
+const TONI_PIN  = 'REPLACE_WITH_TONI_PIN';  // 4-digit string
+// Named range in the Beast that holds the JSON snapshot
+const SNAP_RANGE = 'WEBAPP_SNAPSHOT';
+// ============================================================
+
+let pinBuffer = '';
+
+function pinPress(digit) {
+  if (!digit) return;
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updateDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(validatePin, 100);
+  }
+}
+
+function pinDel() {
+  if (pinBuffer.length > 0) {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updateDots();
+    document.getElementById('pin-err').textContent = '';
+  }
+}
+
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('d' + i);
+    dot.classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function validatePin() {
+  if (pinBuffer === TONI_PIN) {
+    showLoading();
+    loadDash();
+  } else {
+    document.getElementById('pin-err').textContent = 'Incorrect PIN. Try again.';
+    pinBuffer = '';
+    updateDots();
+  }
+}
+
+function showLoading() {
+  document.getElementById('pin-screen').style.display    = 'none';
+  document.getElementById('loading-screen').style.display = 'flex';
+  document.getElementById('dash-screen').style.display   = 'none';
+}
+
+function showDash() {
+  document.getElementById('pin-screen').style.display    = 'none';
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('dash-screen').style.display   = 'block';
+}
+
+function logout() {
+  pinBuffer = '';
+  updateDots();
+  document.getElementById('pin-err').textContent = '';
+  document.getElementById('pin-screen').style.display    = 'flex';
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('dash-screen').style.display   = 'none';
+}
+
+function fmt(n) {
+  return '$' + parseFloat(n || 0).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function fmtAge(ts) {
+  if (!ts) return '';
+  const d = new Date(ts.replace(' ', 'T'));
+  if (isNaN(d)) return 'Updated: ' + ts;
+  const diff = Math.round((Date.now() - d.getTime()) / 60000);
+  if (diff < 2)  return 'Updated just now';
+  if (diff < 60) return diff + 'm ago';
+  const hrs = Math.floor(diff / 60);
+  if (hrs < 24)  return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+
+function loadDash() {
+  showLoading();
+  const url = 'https://sheets.googleapis.com/v4/spreadsheets/' +
+    SHEET_ID + '/values/' + SNAP_RANGE + '?key=' + API_KEY;
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.values || !data.values[0] || !data.values[0][0]) {
+        renderError('No snapshot found. Jason needs to run "Refresh Toni Snapshot" from the Beast first.');
+        return;
+      }
+      const raw = data.values[0][0];
+      let snap;
+      try { snap = JSON.parse(raw); }
+      catch(e) { renderError('Snapshot data corrupted. Ask Jason to refresh it.'); return; }
+      renderDash(snap);
+    })
+    .catch(function(err) {
+      renderError('Connection error. Check your signal and tap Refresh.');
+    });
+}
+
+function renderError(msg) {
+  showDash();
+  document.getElementById('dash-content').innerHTML =
+    '<div class="err-card">' + msg + '</div>';
+}
+
+function renderDash(s) {
+  showDash();
+  document.getElementById('snap-age').textContent = fmtAge(s.asOf);
+
+  const taColor = s.trulyAvailable >= 200 ? '#1E8449' :
+                  s.trulyAvailable >= 0   ? '#F39C12' : '#E74C3C';
+
+  // Build open items list
+  let itemsHtml = '';
+  if (s.openItems && s.openItems.length > 0) {
+    s.openItems.forEach(function(item) {
+      itemsHtml +=
+        '<div class="stat-row">' +
+        '<span class="stat-lbl">' + item.desc + '</span>' +
+        '<span class="stat-val amber">' + fmt(item.amt) + '</span>' +
+        '</div>';
+    });
+    itemsHtml +=
+      '<div class="total-row">' +
+      '<span class="total-lbl">Total remaining</span>' +
+      '<span class="total-val">' + fmt(s.totalStillHitting) + '</span>' +
+      '</div>';
+  } else {
+    itemsHtml = '<div class="clear-week">Nothing open — clear week ✓</div>';
+  }
+
+  // Wartime banner
+  const wartimeBanner = s.wartime ?
+    '<div class="wartime-banner">⚠ WARTIME MODE — Surplus goes to debt payoff</div>' : '';
+
+  // Pending badge
+  const pendingHtml = s.pendingCount > 0 ?
+    '<div style="text-align:center;margin-top:8px;">' +
+    '<span class="pending-badge">' + s.pendingCount + ' pending review</span>' +
+    '</div>' : '';
+
+  document.getElementById('dash-content').innerHTML =
+    // Shield
+    '<div class="shield-card ' + (s.shieldSafe ? 'shield-safe' : 'shield-warn') + '">' +
+    '<div class="shield-label">' + s.shieldLabel + '</div>' +
+    '<div class="shield-week">Week ' + s.weekNum + '</div>' +
+    '</div>' +
+
+    // Wartime
+    wartimeBanner +
+
+    // Truly Available
+    '<div class="ta-card">' +
+    '<div class="ta-label">Truly Available</div>' +
+    '<div class="ta-amount" style="color:' + taColor + ';">' + fmt(s.trulyAvailable) + '</div>' +
+    '<div class="ta-sub">after all obligations + $1,000 floor across 12 weeks</div>' +
+    '</div>' +
+
+    // Still hitting
+    '<div class="section">' +
+    '<div class="section-title">Still Hitting This Week</div>' +
+    itemsHtml +
+    '</div>' +
+
+    // KC Balance
+    '<div class="section">' +
+    '<div class="section-title">KeyBank Checking</div>' +
+    '<div class="bal-amount">' + fmt(s.balKC) + '</div>' +
+    '</div>' +
+
+    // Pending
+    pendingHtml;
+}
+</script>
+</body>
+</html>
