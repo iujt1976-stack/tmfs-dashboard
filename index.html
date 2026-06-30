@@ -420,10 +420,10 @@
 // CONFIG — replace these before deploying to GitHub Pages
 // ============================================================
 const SHEET_ID  = '1Aejj5C2A3482pGn1phzgbNpnMiQBJDZtb_z2vFFrsLc';
-const API_KEY   = 'AIzaSyDsZo2zsyxdO6-96GB2YIXa2-LQ-Ef0v_k';  // restrict to: iujt1976-stack.github.io/*
-const TONI_PIN  = '1983';  // 4-digit string
+const API_KEY   = 'REPLACE_WITH_API_KEY';  // restrict to: iujt1976-stack.github.io/*
+const TONI_PIN  = 'REPLACE_WITH_TONI_PIN';  // 4-digit string
 // Named range in the Beast that holds the JSON snapshot
-const SNAP_RANGE = 'CONFIG_Global_Rules!B142';
+const SNAP_RANGE = 'WEBAPP_SNAPSHOT';
 // ============================================================
 
 let pinBuffer = '';
@@ -510,20 +510,27 @@ function loadDash() {
     SHEET_ID + '/values/' + SNAP_RANGE + '?key=' + API_KEY;
 
   fetch(url)
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      if (!r.ok) {
+        return r.json().then(function(e) {
+          throw new Error('HTTP ' + r.status + ': ' + (e.error && e.error.message ? e.error.message : r.statusText));
+        });
+      }
+      return r.json();
+    })
     .then(function(data) {
       if (!data.values || !data.values[0] || !data.values[0][0]) {
-        renderError('No snapshot found. Jason needs to run "Refresh Toni Snapshot" from the Beast first.');
+        renderError('Cell is empty. Run: TMFS Admin → Refresh Toni Snapshot Now. Then tap Refresh here. [URL: ' + url.substring(0,80) + ']');
         return;
       }
       const raw = data.values[0][0];
       let snap;
       try { snap = JSON.parse(raw); }
-      catch(e) { renderError('Snapshot data corrupted. Ask Jason to refresh it.'); return; }
+      catch(e) { renderError('Parse error: ' + e.message + ' | Data: ' + raw.substring(0,80)); return; }
       renderDash(snap);
     })
     .catch(function(err) {
-      renderError('Connection error. Check your signal and tap Refresh.');
+      renderError('Error: ' + (err.message || 'unknown') + ' | Fetching: ' + SNAP_RANGE);
     });
 }
 
@@ -592,10 +599,13 @@ function renderDash(s) {
     itemsHtml +
     '</div>' +
 
-    // KC Balance
+    // Account Balances
     '<div class="section">' +
-    '<div class="section-title">KeyBank Checking</div>' +
-    '<div class="bal-amount">' + fmt(s.balKC) + '</div>' +
+    '<div class="section-title">Account Balances</div>' +
+    '<div class="stat-row"><span class="stat-lbl">KeyBank Checking</span><span class="stat-val white">' + fmt(s.balKC) + '</span></div>' +
+    (s.balAC > 0 ? '<div class="stat-row"><span class="stat-lbl">Ally Checking</span><span class="stat-val white">' + fmt(s.balAC) + '</span></div>' : '') +
+    (s.balKS > 0 ? '<div class="stat-row"><span class="stat-lbl">KeyBank Savings</span><span class="stat-val white">' + fmt(s.balKS) + '</span></div>' : '') +
+    (s.balAS > 0 ? '<div class="stat-row"><span class="stat-lbl">Ally Savings</span><span class="stat-val white">' + fmt(s.balAS) + '</span></div>' : '') +
     '</div>' +
 
     // Pending
